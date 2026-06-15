@@ -10,8 +10,9 @@ working agent in 5–10 minutes.
 This is a **deliverable**, not an active coding project. There's no
 build, no test, no deploy loop. The "test" for this bundle is:
 
-1. Sanity-check: `grep -rE "jay|/Users/jay|mini\.lan|chat_id" .` — must
-   return zero hits.
+1. Sanity-check: `./scripts/check-sanitization.sh` — must print
+   "All sanitization checks passed." (the script does the 5-class
+   leak check; see `docs/configuration.md` for the recipe).
 2. `bash -n install.sh` — must succeed.
 3. `python3 scripts/update_watchdog.py` in a clean git repo — must
    exit silently.
