@@ -423,6 +423,84 @@ if [ -f "$HOME/.hermes/scripts/update_watchdog.py" ] && [ -f "$HOME/.hermes/scri
     fi
 fi
 
+# --- 10b. Optional: set up the web dashboard ----------------------------
+
+INSTALLED_DASHBOARD=0
+
+# Detect the dashboard subcommand. If the agent version doesn't have
+# it (older versions), skip the prompt rather than failing.
+if command -v hermes >/dev/null 2>&1 && hermes dashboard --help >/dev/null 2>&1; then
+    if confirm "Set up the web dashboard now? (LAN-only admin panel at http://127.0.0.1:9119)" "n"; then
+        # 1. Generate a random password and a cookie-signing secret if
+        #    the user doesn't have them yet. Skip silently if the .env
+        #    already has values (don't clobber).
+        ENV_FILE="$HOME/.hermes/.env"
+        touch "$ENV_FILE"
+        chmod 600 "$ENV_FILE"
+
+        NEED_WRITE=0
+        for VAR in HERMES_DASHBOARD_BASIC_AUTH_USERNAME \
+                   HERMES_DASHBOARD_BASIC_AUTH_PASSWORD \
+                   HERMES_DASHBOARD_BASIC_AUTH_SECRET; do
+            if ! grep -q "^${VAR}=" "$ENV_FILE" 2>/dev/null; then
+                NEED_WRITE=1
+                break
+            fi
+        done
+
+        if [ "$NEED_WRITE" = 1 ]; then
+            if confirm "Generate random username + password for the dashboard? (stored in ~/.hermes/.env, chmod 600)" "y"; then
+                USERNAME="admin"
+                PASSWORD=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)
+                SECRET=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 48)
+
+                # Append the new vars without clobbering other content.
+                {
+                    echo ""
+                    echo "# Web dashboard basic auth (added by hermes-starter-bundle install.sh)"
+                    echo "HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${USERNAME}"
+                    echo "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${PASSWORD}"
+                    echo "HERMES_DASHBOARD_BASIC_AUTH_SECRET=${SECRET}"
+                } >> "$ENV_FILE"
+
+                ok "Generated and saved username + password to $ENV_FILE (chmod 600)."
+                warn "SAVE THE PASSWORD: $PASSWORD"
+                warn "(It's also in $ENV_FILE; back that file up to your password manager.)"
+            else
+                warn "Skipping dashboard auth. Set the env vars manually:"
+                warn "  HERMES_DASHBOARD_BASIC_AUTH_USERNAME, _PASSWORD, _SECRET"
+            fi
+        else
+            ok "Dashboard auth env vars already present in $ENV_FILE."
+        fi
+
+        # 2. Offer to start the dashboard.
+        if confirm "Start the dashboard now? (binds 127.0.0.1:9119 by default — change --host for LAN)" "y"; then
+            info "Starting dashboard in the background..."
+            # nohup + disown so it survives the install script exiting.
+            # Default --host is 127.0.0.1 (loopback only). The user can
+            # change to 0.0.0.0 for LAN access — see docs/dashboard.md.
+            nohup hermes dashboard --no-open --host 127.0.0.1 --port 9119 \
+                > "$HOME/.hermes/logs/dashboard.log" 2>&1 &
+            DASHBOARD_PID=$!
+            disown $DASHBOARD_PID 2>/dev/null || true
+            sleep 2
+            if kill -0 $DASHBOARD_PID 2>/dev/null; then
+                INSTALLED_DASHBOARD=1
+                ok "Dashboard started (PID $DASHBOARD_PID). Open http://127.0.0.1:9119"
+                ok "Log: tail -f ~/.hermes/logs/dashboard.log"
+            else
+                warn "Dashboard process didn't stay up. Check $HOME/.hermes/logs/dashboard.log"
+            fi
+        else
+            info "To start later: hermes dashboard --no-open --host 127.0.0.1 --port 9119"
+        fi
+    fi
+else
+    warn "Skipping dashboard setup: 'hermes dashboard' not available in this agent version."
+    warn "(The dashboard is built-in to recent Hermes versions; check `hermes dashboard --help`.)"
+fi
+
 # --- 11. Final summary ---------------------------------------------------
 
 echo ""
@@ -439,6 +517,7 @@ echo ""
 [ "$COPIED_CONFIG" = 1 ]        && echo "  • Copied bundle into ~/.hermes/"
 [ "$SETUP_PROVIDER" = 1 ]       && echo "  • Configured provider + auth.json"
 [ "$INSTALLED_CRON" = 1 ]       && echo "  • Installed update_watchdog cron"
+[ "$INSTALLED_DASHBOARD" = 1 ] && echo "  • Set up and started the web dashboard"
 echo ""
 
 echo "${BOLD}Next steps:${RESET}"
@@ -460,6 +539,10 @@ echo "       edit ~/.hermes/config/AGENTS.md"
 echo ""
 echo "  6. ${BOLD}Wire up the messaging gateway (optional):${RESET}"
 echo "       hermes gateway   # then add platforms via 'hermes setup'"
+echo ""
+echo "  7. ${BOLD}Open the web dashboard (optional):${RESET}"
+echo "       open http://127.0.0.1:9119   # default loopback"
+echo "       # See ~/.hermes/docs/dashboard.md for LAN setup"
 echo ""
 echo "${BOLD}Documentation:${RESET}"
 echo "  • Bundle README:    $SCRIPT_DIR/README.md"

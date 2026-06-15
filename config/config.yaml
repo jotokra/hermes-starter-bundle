@@ -144,7 +144,29 @@ display:
   tui_status_indicator: kaomoji
 
 dashboard:
+  # Web admin panel (run via `hermes dashboard`). See docs/dashboard.md.
   theme: mono
+  # Show token-usage analytics in the dashboard UI.
+  show_token_analytics: false
+  # OAuth (Nous Portal) — leave empty to use basic auth instead.
+  oauth:
+    client_id: ''
+    portal_url: ''
+  # Basic auth (username + password). Set via .env, not here:
+  #   HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+  #   HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+  #   HERMES_DASHBOARD_BASIC_AUTH_SECRET    (cookie-signing key)
+  # The empty strings below are placeholders; the .env values take
+  # precedence at runtime.
+  basic_auth:
+    username: ''
+    password_hash: ''
+    password: ''
+    secret: ''
+    session_ttl_seconds: 0
+  # Public URL for OAuth callbacks (set when exposing the dashboard
+  # via a public hostname). Leave empty for LAN-only setups.
+  public_url: ''
 
 # Privacy / output redaction. Leave redact_secrets on unless you have a
 # specific reason to disable it.

@@ -32,13 +32,15 @@ hermes-starter-bundle/
 │   └── housekeeper/            # maintenance
 ├── scripts/                    # companion scripts
 │   ├── update_watchdog.py      # generic auto-commit watchdog
-│   └── update_watchdog.md      # its doc
+│   ├── update_watchdog.md      # its doc
+│   └── check-sanitization.sh   # bundle-wide 6-class leak gate (run before every commit)
 ├── examples/                   # reference templates
 │   └── project-AGENTS.md.template
 └── docs/                       # deeper documentation
     ├── configuration.md
     ├── profiles.md
     ├── diagnostics.md
+    ├── dashboard.md            # web admin panel setup (LAN-only)
     └── hooks.md
 ```
 
@@ -106,6 +108,11 @@ hermes profile list
 
 # Run the messaging gateway
 hermes gateway
+
+# Open the web admin panel (browser at 127.0.0.1:9119)
+hermes dashboard
+# LAN access: hermes dashboard --host 0.0.0.0
+# (See docs/dashboard.md for the full setup, including basic-auth env vars.)
 
 # Inspect / tweak config
 hermes config show
