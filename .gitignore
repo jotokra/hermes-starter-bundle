@@ -1,0 +1,21 @@
+# Bundle-level .gitignore
+#
+# The bundle itself is config + docs, no runtime artifacts. The only
+# thing we want to ignore is what users add locally during testing.
+
+# Local testing artifacts
+*.bak
+*.swp
+.DS_Store
+__pycache__/
+
+# If the user clones the bundle and uses it directly (vs. extracting),
+# these would be runtime files.
+auth.json
+.env
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.lock
+*.pid

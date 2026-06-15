@@ -1,0 +1,55 @@
+# ~/Projects/<project>/AGENTS.md — example template
+
+If you add a new top-level project under `~/Projects/`, the project
+should ship its own `AGENTS.md` describing its stack and conventions.
+This is a starter template; copy and adapt.
+
+```markdown
+# <Project name>
+
+<One-line description: what this project is, what it does, who uses it.>
+
+## What this is
+
+<2-3 paragraphs: the problem, the solution, the stack.>
+
+## Dev setup
+
+<How a new dev gets the project running locally. Include the exact
+clone + install + setup commands.>
+
+## Run
+
+<How to start the dev server, run a single command, etc.>
+
+## Test
+
+<How to run the test suite. Include the test runner command and any
+fixtures that need to be set up first.>
+
+## Deploy
+
+<Where this lives in production, how to push a release, what
+infrastructure it depends on.>
+
+## Key files
+
+<Bullet list of the most important files / dirs, with a one-liner
+about what each is for.>
+
+## See also
+
+- `~/AGENTS.md` — workspace layout, project index, sovereignty rules.
+- `~/.hermes/AGENTS.md` — runtime contract, workflow rules, scratch layout.
+- `<link to the project's kanban board, if any>`
+- `<link to design docs / RFCs, if any>`
+
+## Things not to do
+
+<Specific anti-patterns, past bugs, known footguns.>
+```
+
+Replace the angle-bracketed sections with your project's content. The
+**`## See also`** section is critical — every project AGENTS.md must
+point back to the two parent contracts so future agents don't have to
+guess at workspace-wide rules.

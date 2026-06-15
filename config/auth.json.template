@@ -1,0 +1,14 @@
+{
+  "_comment": "DO NOT commit a real auth.json. This file is the TEMPLATE that auth.json.template.example is generated from. To set up your own auth, either: (1) run `hermes login` and the agent will populate ~/.hermes/auth.json for you, or (2) copy auth.json.template to ~/.hermes/auth.json and fill in your own provider credentials. Secrets NEVER go in git.",
+  "_usage": "cp auth.json.template ~/.hermes/auth.json && edit ~/.hermes/auth.json with your real keys",
+  "_permissions": "chmod 600 ~/.hermes/auth.json after copying",
+  "version": 1,
+  "active_provider": "<<your-provider-name>>",
+  "providers": {
+    "<<your-provider-name>>": {
+      "provider": "<<your-provider-name>>",
+      "inference_base_url": "<<https://api.example.com/v1>>",
+      "api_key": "<<your-api-key-here>>"
+    }
+  }
+}

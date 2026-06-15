@@ -1,0 +1,291 @@
+# Hermes Agent — starter config
+#
+# This is a sanitized starting point. It contains the structural values that
+# work out of the box on any macOS or Linux dev box. Tweak to taste.
+#
+# Conventions:
+#   - Placeholders are in <<angle brackets>>. Replace them with your values.
+#   - API keys NEVER go in this file. They live in auth.json (see auth.json.template).
+#   - Comments starting with "# TODO:" mark things you almost certainly want to set.
+
+model:
+  # Default model + provider. Pick a provider that matches your auth.json.
+  # Options (after running `hermes setup`):
+  #   - anthropic (Claude)         — direct Anthropic API
+  #   - openai                      — direct OpenAI API
+  #   - openrouter                  — many models, one key
+  #   - ollama / custom:ollama      — local models, no key
+  #   - minimax-oauth               — MiniMax OAuth (set up via `hermes login`)
+  default: <<your-model-name>>
+  provider: <<your-provider-name>>
+  # base_url is only needed for custom endpoints. Uncomment + set if using one.
+  # base_url: https://api.openrouter.ai/v1
+
+providers: {}
+fallback_providers: []
+providers_disabled: []
+
+credential_pool_strategies: {}
+
+# Toolsets the agent has access to. Add more as you discover you need them.
+# Common additions: github, web, browser, terminal, delegation, skills, kanban.
+toolsets:
+  - hermes-cli
+
+max_concurrent_sessions: 7
+
+agent:
+  max_turns: 500
+  restart_drain_timeout: 360
+  api_max_retries: 3
+  tool_use_enforcement: auto
+  task_completion_guidance: true
+  environment_probe: true
+  environment_hint: ''
+  gateway_timeout: null
+  gateway_timeout_warning: 14400
+  # How long a `clarify` question stays open before auto-resolving.
+  # 7200 = 2h, useful if you step away from the keyboard.
+  clarify_timeout: 7200
+  gateway_notify_interval: 180
+  gateway_auto_continue_freshness: 21600
+  image_input_mode: auto
+  disabled_toolsets: []
+  verbose: false
+  # One of: low | medium | high | xhigh
+  reasoning_effort: high
+  personalities:
+    helpful: You are a helpful, friendly AI assistant.
+    concise: You are a concise assistant. Keep responses brief and to the point.
+    technical: You are a technical expert. Provide detailed, accurate technical information.
+
+terminal:
+  backend: local
+  modal_mode: auto
+  cwd: .
+  timeout: 180
+  env_passthrough: []
+  shell_init_files: []
+  auto_source_bashrc: true
+  persistent_shell: true
+  lifetime_seconds: 300
+
+web:
+  backend: ''
+  search_backend: ''
+  extract_backend: ''
+
+browser:
+  inactivity_timeout: 240
+  command_timeout: 60
+  record_sessions: false
+  allow_private_urls: false
+  engine: auto
+  auto_local_for_private_urls: true
+  cdp_url: ''
+
+# File-handling limits. Bump file_read_max_chars if you regularly read big files.
+file_read_max_chars: 500000
+
+tool_output:
+  max_bytes: 200000
+  max_lines: 4000
+  max_line_length: 2000
+
+# Auto-warn / auto-stop when the agent repeats the same failing tool call.
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: false
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 2
+  hard_stop_after:
+    exact_failure: 5
+    same_tool_failure: 8
+    idempotent_no_progress: 5
+
+# Conversation history compression. Leave at defaults unless you know why you're
+# changing them.
+compression:
+  enabled: true
+  threshold: 0.8
+  target_ratio: 0.3
+  protect_last_n: 100
+  protect_first_n: 3
+  hygiene_hard_message_limit: 1500
+  abort_on_summary_failure: false
+
+prompt_caching:
+  cache_ttl: 5m
+
+# Auxiliary small-task models (vision, web extract, compression, etc.).
+# For a starter config, leave these blank — the agent will fall back to the
+# main `model:` block above. Add custom entries only when you have a fast
+# local model you want to use for cheap side-tasks.
+auxiliary: {}
+
+display:
+  compact: false
+  personality: ''
+  resume_display: full
+  resume_exchanges: 10
+  resume_max_user_chars: 300
+  resume_max_assistant_chars: 200
+  resume_skip_tool_only: true
+  busy_input_mode: interrupt
+  interface: cli
+  show_reasoning: false
+  streaming: true
+  timestamps: false
+  inline_diffs: true
+  file_mutation_verifier: true
+  show_cost: false
+  tui_status_indicator: kaomoji
+
+dashboard:
+  theme: mono
+
+# Privacy / output redaction. Leave redact_secrets on unless you have a
+# specific reason to disable it.
+privacy:
+  redact_secrets: true
+
+# Text-to-speech defaults. Only relevant if you wire up a TTS provider.
+tts: {}
+stt: {}
+voice: {}
+
+# How the agent "thinks for a moment" between typing and answering on
+# chat platforms. Set human_delay_ms to 0 for snappy replies.
+human_delay:
+  enabled: false
+  min_ms: 800
+  max_ms: 2500
+
+# Persistent memory. The agent remembers facts about you + the env across
+# sessions. Edit ~/.hermes/memories/MEMORY.md and USER.md directly to
+# add/remove memories.
+context:
+  memory:
+    enabled: true
+    auto_inject: true
+
+# Subagent delegation. The max_concurrent_children cap is the floor — raise
+# it in config.yaml only if you have the headroom.
+delegation:
+  enabled: true
+  max_concurrent_children: 5
+  max_spawn_depth: 1
+
+# Skills subsystem.
+skills:
+  auto_load: true
+  curated_only: false
+
+# Skill curator (auto-archives unused skills, etc.). Leave at defaults.
+curator: {}
+
+# Your timezone, IANA name. e.g. America/New_York, Europe/Berlin.
+# Find yours: `TZ=$(date +%Z) timedatectl 2>/dev/null; echo $TZ` or
+# `systemsetup -gettimezone` on macOS.
+timezone: ''
+
+# Channel integrations. Each platform has its own block; leave empty if
+# you're not using it. The gateway (hermes gateway) reads from here.
+slack: {}
+discord: {}
+whatsapp: {}
+telegram: {}
+mattermost: {}
+matrix: {}
+
+# Approvals gate. The agent will ask before running destructive commands
+# (rm -rf, force-push, etc.) when mode = manual.
+approvals:
+  mode: manual
+  timeout: 60
+  cron_mode: deny
+  mcp_reload_confirm: true
+  destructive_slash_confirm: false
+
+# Commands the agent can run without asking. Conservative default.
+command_allowlist:
+  - script execution via -e/-c flag
+  - hermes update (restarts gateway, kills running agents)
+
+quick_commands: {}
+
+# Hooks — shell commands that run on agent lifecycle events.
+# See docs/hooks.md in the bundle for the event names.
+hooks: {}
+hooks_auto_accept: false
+
+# Personality presets (see `hermes personality list`).
+personalities: {}
+
+# Security defaults.
+security:
+  allow_private_urls: false
+  redact_secrets: true
+  tirith_enabled: true
+  tirith_path: tirith
+  tirith_timeout: 5
+  tirith_fail_open: true
+  website_blocklist:
+    enabled: false
+    domains: []
+    shared_files: []
+  acked_advisories: []
+  allow_lazy_installs: true
+
+cron:
+  wrap_response: true
+  max_parallel_jobs: null
+  min_interval_hours: 24
+  write_json_snapshots: false
+
+onboarding:
+  seen: {}
+  profile_build: ask
+
+updates:
+  pre_update_backup: false
+  backup_keep: 5
+  non_interactive_local_changes: stash
+
+# Language Server Protocol — gives the agent go-to-definition, find-refs
+# in code. install_strategy: auto will `pip install` the missing servers
+# on first use.
+lsp:
+  enabled: true
+  wait_mode: document
+  wait_timeout: 5.0
+  install_strategy: auto
+  servers: {}
+
+secrets:
+  bitwarden:
+    enabled: false
+    access_token_env: BWS_ACCESS_TOKEN
+    project_id: ''
+    cache_ttl_seconds: 300
+    override_existing: true
+    auto_install: true
+    server_url: ''
+
+paste_collapse_threshold: 5
+paste_collapse_threshold_fallback: 5
+paste_collapse_char_threshold: 2000
+
+# Reset long sessions. 1440 idle minutes = 24h.
+session_reset:
+  mode: both
+  idle_minutes: 1440
+  at_hour: 4
+group_sessions_per_user: true
+
+# Per-platform toolset overrides. Add platforms here as you wire them up.
+platform_toolsets:
+  cli:
+    - hermes-cli
