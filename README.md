@@ -35,7 +35,8 @@ hermes-starter-bundle/
 │   ├── update_watchdog.md      # its doc
 │   └── check-sanitization.sh   # bundle-wide 6-class leak gate (run before every commit)
 ├── examples/                   # reference templates
-│   └── project-AGENTS.md.template
+│   ├── project-AGENTS.md.template
+│   └── ai.hermes.dashboard.plist.template   # macOS auto-start for the dashboard
 └── docs/                       # deeper documentation
     ├── configuration.md
     ├── profiles.md

@@ -168,11 +168,14 @@ tail -f ~/.hermes/logs/dashboard.log
 
 ## Gotchas
 
-- **No auto-restart on reboot.** The dashboard was started manually
-  in a background process. To survive reboots, register a launchd
-  plist (macOS) or systemd user unit (Linux). The agent's
-  `hermes gateway install` does this for the gateway; the
-  dashboard doesn't have an equivalent built-in yet.
+- **No auto-restart on reboot (without extra setup).** Out of the
+  box, the dashboard was started manually in a background process.
+  To survive reboots, register a launchd plist (macOS) or systemd
+  user unit (Linux). The bundle ships a launchd plist template at
+  `examples/ai.hermes.dashboard.plist.template` — the install
+  script's third dashboard prompt offers to install it for you.
+  The agent's `hermes gateway install` does this for the gateway;
+  the dashboard doesn't have an equivalent built-in yet.
 - **Cookies, not basic auth.** The login form POSTs JSON to
   `/auth/password-login` and gets back two HttpOnly cookies. Don't
   confuse "I'm sending basic auth" (you aren't, except as a

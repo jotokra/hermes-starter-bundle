@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.hermes.dashboard</string>
+
+    <!--
+        Launchd plist for the Hermes web dashboard.
+        This file lives at ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+        on macOS. Load it with:
+
+            cp this-file ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+            # Edit the ProgramArguments paths below to match your install
+            launchctl load ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+
+        The dashboard will:
+          - Start on login (LimitLoadToSessionType: Aqua)
+          - Restart on crash (KeepAlive: true)
+          - Run on both Aqua (foreground user session) and Background
+          - Log to ~/.hermes/logs/dashboard.log and dashboard.error.log
+
+        Replace <<hermes-venv-path>> with the absolute path to your
+        agent venv's hermes binary, e.g.:
+
+            /Users/yourname/.hermes/hermes-agent/venv/bin/hermes
+
+        Replace <<hermes-home>> with the absolute path to your HERMES_HOME,
+        e.g.:
+
+            /Users/yourname/.hermes
+
+        To stop the dashboard:
+            launchctl unload ~/Library/LaunchAgents/ai.hermes.dashboard.plist
+
+        To check status:
+            launchctl list | grep hermes
+    -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string><<hermes-venv-path>></string>
+        <string>dashboard</string>
+        <string>--no-open</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>9119</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string><<hermes-home>></string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string><<hermes-venv-path>>/../..:/<<hermes-home>>/hermes-agent/node_modules/.bin:<<hermes-home>>/node/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>VIRTUAL_ENV</key>
+        <string><<hermes-venv-path>>/..</string>
+        <key>HERMES_HOME</key>
+        <string><<hermes-home>></string>
+    </dict>
+
+    <key>LimitLoadToSessionType</key>
+    <array>
+        <string>Aqua</string>
+        <string>Background</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string><<hermes-home>>/logs/dashboard.log</string>
+
+    <key>StandardErrorPath</key>
+    <string><<hermes-home>>/logs/dashboard.error.log</string>
+</dict>
+</plist>

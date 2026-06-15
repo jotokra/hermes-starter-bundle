@@ -495,6 +495,41 @@ if command -v hermes >/dev/null 2>&1 && hermes dashboard --help >/dev/null 2>&1;
         else
             info "To start later: hermes dashboard --no-open --host 127.0.0.1 --port 9119"
         fi
+
+        # 3. (macOS only) Offer to install a launchd plist so the dashboard
+        #    auto-starts on login + restarts on crash. This replaces the
+        #    manual `hermes dashboard &` step with a system-managed service.
+        if [ "$OS" = "Darwin" ] && [ -f "$SCRIPT_DIR/examples/ai.hermes.dashboard.plist.template" ]; then
+            if confirm "Install a launchd plist for auto-start on login? (macOS only)" "n"; then
+                PLIST_SRC="$SCRIPT_DIR/examples/ai.hermes.dashboard.plist.template"
+                PLIST_DEST="$HOME/Library/LaunchAgents/ai.hermes.dashboard.plist"
+
+                # Substitute the user's actual paths.
+                HERMES_BIN="$(command -v hermes)"
+                HERMES_HOME_DIR="$HOME/.hermes"
+
+                # The venv path is hermes' bin's parent. For a typical
+                # ~/.local/bin/hermes symlink, the venv is wherever the
+                # symlink resolves to. Fall back to HERMES_HOME/hermes-agent/venv.
+                if [ -L "$HERMES_BIN" ]; then
+                    VENV_BIN="$(readlink -f "$HERMES_BIN" 2>/dev/null || readlink "$HERMES_BIN")"
+                else
+                    VENV_BIN="$HERMES_BIN"
+                fi
+                VENV_DIR="$(cd "$(dirname "$VENV_BIN")/.." 2>/dev/null && pwd)"
+
+                mkdir -p "$HOME/Library/LaunchAgents"
+                sed -e "s|<<hermes-venv-path>>|$VENV_BIN|g" \
+                    -e "s|<<hermes-home>>|$HERMES_HOME_DIR|g" \
+                    "$PLIST_SRC" > "$PLIST_DEST"
+
+                # Load it.
+                launchctl load "$PLIST_DEST" 2>/dev/null && \
+                    ok "launchd plist installed and loaded: $PLIST_DEST" || \
+                    warn "Plist installed but launchctl load failed. Try manually:"
+                warn "  launchctl load $PLIST_DEST"
+            fi
+        fi
     fi
 else
     warn "Skipping dashboard setup: 'hermes dashboard' not available in this agent version."
